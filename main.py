@@ -41,11 +41,13 @@ async def get_recommendations(
         'topic': topic
     }])
 
-    weak_topics, improvement_trends, performance_gap = analyze_performance(current_df, historical_df)
+    combined_df = pd.concat([historical_df, current_df], ignore_index=True)
 
-    student_persona = define_student_persona(current_df, historical_df)
+    weak_topics, improvement_trends, performance_gap = analyze_performance(combined_df)
 
-    recommendations = generate_recommendations(weak_topics, improvement_trends, performance_gap, quiz_data.topic)
+    student_persona = define_student_persona(combined_df)
+
+    recommendations = generate_recommendations(weak_topics, performance_gap, topic)
 
     weak_topics_image, improvement_trends_image, performance_gap_image = visualize_insights(weak_topics, improvement_trends, performance_gap)
 

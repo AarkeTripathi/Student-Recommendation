@@ -4,29 +4,25 @@ import io
 import base64
 
 
-def analyze_performance(current_df, historical_df):
-    combined_df = pd.concat([historical_df, current_df], ignore_index=True)
-
-    numeric_columns = combined_df.select_dtypes(include=["number"])
-    topic_performance = combined_df.groupby("topic")[numeric_columns.columns].mean()
+def analyze_performance(quiz_df):
+    numeric_columns = quiz_df.select_dtypes(include=["number"])
+    topic_performance = quiz_df.groupby("topic")[numeric_columns.columns].mean()
 
     weak_topics = topic_performance[topic_performance["accuracy"] < 0.5]
 
-    improvement_trends = combined_df.groupby("quiz_id")["accuracy"].mean()
+    improvement_trends = quiz_df.groupby("quiz_id")["accuracy"].mean()
 
-    performance_gap = combined_df.groupby("topic")["accuracy"].agg(['max', 'min'])
+    performance_gap = quiz_df.groupby("topic")["accuracy"].agg(['max', 'min'])
     performance_gap["gap"] = performance_gap["max"] - performance_gap["min"]
 
     return weak_topics, improvement_trends, performance_gap
 
 
-def define_student_persona(current_df, historical_df):
-    combined_df = pd.concat([historical_df, current_df], ignore_index=True)
-
-    average_accuracy = combined_df["accuracy"].mean()
-    total_quizzes = len(combined_df)
-    topics_attempted = combined_df["topic"].nunique()
-    weak_topics = combined_df.groupby("topic")["accuracy"].mean().where(lambda x: x < 0.5).dropna().index.tolist()
+def define_student_persona(quiz_df):
+    average_accuracy = quiz_df["accuracy"].mean()
+    total_quizzes = len(quiz_df)
+    topics_attempted = quiz_df["topic"].nunique()
+    weak_topics = quiz_df.groupby("topic")["accuracy"].mean().where(lambda x: x < 0.5).dropna().index.tolist()
 
     if average_accuracy > 0.8:
         persona = "High Performer"
